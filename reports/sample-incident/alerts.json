@@ -1,6 +1,6 @@
 {
   "report_title": "NightWatch Incident Report",
-  "total_alerts": 1,
+  "total_alerts": 2,
   "alerts": [
     {
       "rule": "REPEATED_LOGIN_FAILURES",
@@ -10,6 +10,15 @@
       "first_seen": "2026-10-13T10:00:00+00:00",
       "last_seen": "2026-10-13T10:00:15+00:00",
       "severity": "medium"
+    },
+    {
+      "rule": "SUCCESS_AFTER_REPEATED_FAILURES",
+      "source_ip": "192.0.2.10",
+      "failed_attempts": 3,
+      "window_minutes": 5,
+      "first_seen": "2026-10-13T10:00:00+00:00",
+      "last_seen": "2026-10-13T10:00:30+00:00",
+      "severity": "high"
     }
   ],
   "timeline": [
@@ -31,6 +40,13 @@
       "timestamp": "2026-10-13T10:00:15Z",
       "source": "sshd",
       "event_type": "login_failure",
+      "username": "analyst",
+      "source_ip": "192.0.2.10"
+    },
+    {
+      "timestamp": "2026-10-13T10:00:30Z",
+      "source": "sshd",
+      "event_type": "login_success",
       "username": "analyst",
       "source_ip": "192.0.2.10"
     },

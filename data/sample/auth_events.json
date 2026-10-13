@@ -34,4 +34,13 @@
     "username": "guest",
     "source_ip": "192.0.2.30"
   }
+
+    ,
+  {
+    "timestamp": "2026-10-13T10:00:30Z",
+    "source": "sshd",
+    "event_type": "login_success",
+    "username": "analyst",
+    "source_ip": "192.0.2.10"
+  }
 ]

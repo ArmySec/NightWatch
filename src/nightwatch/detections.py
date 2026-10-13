@@ -106,15 +106,20 @@ def main():
     )
 
     events = load_events(events_file)
-    alerts = detect_repeated_failures(events)
+
+    alerts = (
+        detect_repeated_failures(events)
+        + detect_success_after_repeated_failures(events)
+    )
+
     timeline = build_timeline(events)
 
     report_file.parent.mkdir(parents=True, exist_ok=True)
 
     generate_incident_report(
-    alerts,
-    report_file,
-    timeline=timeline,
+        alerts,
+        report_file,
+        timeline=timeline,
     )
 
     print(f"Events analyzed: {len(events)}")
@@ -124,6 +129,68 @@ def main():
     for alert in alerts:
         print(json.dumps(alert, indent=2))
 
+
+
+def detect_success_after_repeated_failures(
+    events,
+    threshold=3,
+    window_minutes=5,
+):
+    """Detect a successful login after repeated failures from the same IP."""
+    if threshold < 1:
+        raise ValueError("Threshold must be at least 1")
+
+    if window_minutes <= 0:
+        raise ValueError("Window must be greater than 0")
+
+    window = timedelta(minutes=window_minutes)
+    failures_by_ip = defaultdict(deque)
+    alerts = []
+
+    for event in events:
+        if not isinstance(event, dict):
+            raise ValueError("Each event must be a JSON object")
+
+    sorted_events = sorted(
+        events,
+        key=lambda event: parse_timestamp(event.get("timestamp")),
+    )
+
+    for event in sorted_events:
+
+        source_ip = event.get("source_ip")
+
+        if not isinstance(source_ip, str) or not source_ip.strip():
+            continue
+
+        timestamp = parse_timestamp(event.get("timestamp"))
+        recent = failures_by_ip[source_ip]
+
+        while recent and timestamp - recent[0] > window:
+            recent.popleft()
+
+        if event.get("event_type") == "login_failure":
+            recent.append(timestamp)
+
+        elif (
+            event.get("event_type") == "login_success"
+            and len(recent) >= threshold
+        ):
+            alerts.append({
+                "rule": "SUCCESS_AFTER_REPEATED_FAILURES",
+                "source_ip": source_ip,
+                "failed_attempts": len(recent),
+                "window_minutes": window_minutes,
+                "first_seen": recent[0].isoformat(),
+                "last_seen": timestamp.isoformat(),
+                "severity": "high",
+            })
+
+            # Clear the failure window to avoid duplicate alerts
+            # from the same series of failures.
+            recent.clear()
+
+    return alerts
 
 if __name__ == "__main__":
     main()

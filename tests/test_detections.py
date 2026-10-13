@@ -4,7 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from src.nightwatch.detections import detect_repeated_failures
+from src.nightwatch.detections import (
+    detect_repeated_failures,
+    detect_success_after_repeated_failures,
+)
 
 
 def make_event(event_type, source_ip, timestamp):
@@ -171,3 +174,36 @@ def test_failures_at_exact_window_boundary_trigger_alert():
 
     assert len(alerts) == 1
     assert alerts[0]["failed_attempts"] == 3
+
+def test_detects_success_after_repeated_failures():
+    start = datetime(2026, 10, 13, 10, 0, tzinfo=timezone.utc)
+
+    events = [
+        make_event("login_failure", "192.0.2.10", start),
+        make_event(
+            "login_failure",
+            "192.0.2.10",
+            start + timedelta(seconds=8),
+        ),
+        make_event(
+            "login_failure",
+            "192.0.2.10",
+            start + timedelta(seconds=15),
+        ),
+        make_event(
+            "login_success",
+            "192.0.2.10",
+            start + timedelta(seconds=30),
+        ),
+    ]
+
+    alerts = detect_success_after_repeated_failures(events)
+
+    assert len(alerts) == 1
+    assert alerts[0]["rule"] == "SUCCESS_AFTER_REPEATED_FAILURES"
+    assert alerts[0]["source_ip"] == "192.0.2.10"
+    assert alerts[0]["failed_attempts"] == 3
+
+def test_rejects_non_dictionary_event():
+    with pytest.raises(ValueError, match="Each event must be a JSON object"):
+        detect_success_after_repeated_failures([None])
