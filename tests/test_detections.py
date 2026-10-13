@@ -157,3 +157,17 @@ def test_failures_from_different_ips_do_not_trigger_alert():
     ]
 
     assert detect_repeated_failures(events) == []
+
+def test_failures_at_exact_window_boundary_trigger_alert():
+    start = datetime(2026, 10, 13, 10, 0, tzinfo=timezone.utc)
+
+    events = [
+        make_event("login_failure", "192.0.2.10", start),
+        make_event("login_failure", "192.0.2.10", start + timedelta(minutes=2)),
+        make_event("login_failure", "192.0.2.10", start + timedelta(minutes=5)),
+    ]
+
+    alerts = detect_repeated_failures(events)
+
+    assert len(alerts) == 1
+    assert alerts[0]["failed_attempts"] == 3
