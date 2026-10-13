@@ -1,0 +1,13 @@
+
+title: Repeated SSH Login Failures
+id: 7a2b9c10-5d41-4e68-9f32-1b6a4c8d0e21
+status: experimental
+description: Detects failed SSH login events. The NightWatch Python engine applies the threshold of three failures within five minutes per source IP.
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    event_type: login_failure
+  condition: selection
+level: medium
