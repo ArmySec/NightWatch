@@ -1,3 +1,4 @@
+from src.nightwatch.log_parser import parse_ssh_file
 from src.nightwatch.timeline import build_timeline
 from src.nightwatch.reporting import generate_incident_report
 from collections import defaultdict, deque
@@ -98,6 +99,9 @@ def main():
     events_file = (
         project_root / "data" / "sample" / "auth_events.json"
     )
+    ssh_log_file = (
+        project_root / "data" / "sample" / "ssh-logs" / "auth.log"
+    )
     report_file = (
         project_root
         / "reports"
@@ -106,6 +110,7 @@ def main():
     )
 
     events = load_events(events_file)
+    events.extend(parse_ssh_file(ssh_log_file, year=2026))
 
     alerts = (
         detect_repeated_failures(events)

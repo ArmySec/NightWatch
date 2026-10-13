@@ -30,6 +30,13 @@
       "source_ip": "192.0.2.10"
     },
     {
+      "timestamp": "2026-10-13T10:00:00+00:00",
+      "source": "sshd",
+      "event_type": "login_failure",
+      "username": "analyst",
+      "source_ip": "192.0.2.40"
+    },
+    {
       "timestamp": "2026-10-13T10:00:08Z",
       "source": "sshd",
       "event_type": "login_failure",
@@ -49,6 +56,13 @@
       "event_type": "login_success",
       "username": "analyst",
       "source_ip": "192.0.2.10"
+    },
+    {
+      "timestamp": "2026-10-13T10:00:30+00:00",
+      "source": "sshd",
+      "event_type": "login_success",
+      "username": "analyst",
+      "source_ip": "192.0.2.40"
     },
     {
       "timestamp": "2026-10-13T10:01:00Z",

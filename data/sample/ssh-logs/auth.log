@@ -1,0 +1,2 @@
+Oct 13 10:00:00 server sshd[1234]: Failed password for analyst from 192.0.2.40 port 54321 ssh2
+Oct 13 10:00:30 server sshd[1235]: Accepted password for analyst from 192.0.2.40 port 54322 ssh2
