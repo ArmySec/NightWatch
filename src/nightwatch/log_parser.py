@@ -9,10 +9,10 @@ SSH_LOG_PATTERN = re.compile(
     r"(?P<time>\d{2}:\d{2}:\d{2})\s+"
     r"(?P<hostname>\S+)\s+"
     r"sshd\[\d+\]:\s+"
-    r"(?P<action>Failed password|Accepted password)\s+"
-    r"for\s+(?P<username>\S+)\s+"
+    r"(?P<action>Failed password|Accepted password|Invalid user)\s+"
+    r"(?:for\s+)?(?P<username>\S+)\s+"
     r"from\s+(?P<source_ip>\d{1,3}(?:\.\d{1,3}){3})\s+"
-    r"port\s+\d+\s+ssh2$"
+    r"port\s+\d+(?:\s+ssh2)?$"
 )
 
 
@@ -39,9 +39,9 @@ def parse_ssh_line(line, year=None):
         return None
 
     event_type = (
-        "login_failure"
-        if data["action"] == "Failed password"
-        else "login_success"
+         "login_failure"
+         if data["action"] in ("Failed password", "Invalid user")
+         else "login_success"
     )
 
     return {

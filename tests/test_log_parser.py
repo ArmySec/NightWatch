@@ -66,3 +66,16 @@ def test_reject_invalid_ipv4_address():
     )
 
     assert parse_ssh_line(line, year=2026) is None
+
+def test_parse_invalid_ssh_user():
+    line = (
+        "Oct 13 10:00:00 server sshd[1236]: "
+        "Invalid user guest from 192.0.2.50 port 54323"
+    )
+
+    event = parse_ssh_line(line, year=2026)
+
+    assert event is not None
+    assert event["event_type"] == "login_failure"
+    assert event["username"] == "guest"
+    assert event["source_ip"] == "192.0.2.50"
